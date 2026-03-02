@@ -76,13 +76,16 @@ export function crearCardProducto(producto) {
       <h3>${producto.name}</h3>
       <p>Precio: $${producto.price}</p>
       <p>${producto.stock > 0 ? "Stock disponible" : "Sin stock"}</p>
-      <button 
-        class="add-to-cart-btn" 
-        data-id="${producto.id_key}"
-        ${producto.stock === 0 ? "disabled" : ""}
-      >
-        Agregar al carrito
-      </button>
+
+      ${
+        producto.stock > 0
+          ? `<button 
+              class="add-to-cart-btn" 
+              data-id="${producto.id_key}">
+              Agregar al carrito
+            </button>`
+          : `<p class="no-stock-label">Sin stock</p>`
+      }
     </div>
   `;
 }

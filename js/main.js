@@ -14,8 +14,8 @@ let cart = [];
 // ===============================
 
 import { initUI, renderProducts, renderCart, updateAuthUI, closeModal, setAddToCartHandler, setCartHandlers } from "./ui.js";
-import { registerAuth, loginAuth, logoutAuth, isLoggedIn } from "./auth.js";
-import { createClient, getProducts } from "./api.js";
+import { registerAuth, loginAuth, logoutAuth, isLoggedIn, setClientId } from "./auth.js";
+import { createClient, getProducts, getClients } from "./api.js";
 
 // ===============================
 // App Init
@@ -112,6 +112,17 @@ function initLogin() {
 
     try {
       loginAuth(email, password);
+
+      // 🔹 Traer clientes del backend
+      const clients = await getClients();
+
+      const client = clients.find(c => c.email === email);
+
+      if (!client) {
+        throw new Error("Cliente no encontrado en la base de datos");
+      }
+
+      setClientId(client.id_key);
 
       alert("Login exitoso");
       closeModal("login");
@@ -280,6 +291,11 @@ function addToCart(product) {
   const existing = cart.find(item => item.id === product.id_key);
 
   if (existing) {
+    if (existing.quantity >= product.stock) {
+      alert("No hay más stock disponible para este producto");
+      return;
+    }
+
     existing.quantity++;
   } else {
     cart.push({
@@ -296,6 +312,14 @@ function addToCart(product) {
 function increaseQuantity(id) {
   const item = cart.find(p => p.id === id);
   if (!item) return;
+
+  const product = allProducts.find(p => p.id_key === id);
+  if (!product) return;
+
+  if (item.quantity >= product.stock) {
+    alert("No hay más stock disponible para este producto");
+    return;
+  }
 
   item.quantity++;
   renderCart(cart, calculateTotal());

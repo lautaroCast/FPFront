@@ -200,6 +200,11 @@ body {
   margin-bottom: 4px;
 }
 
+.no-stock-label {
+  color: red;
+  font-weight: bold;
+}
+
 .no-results {
   grid-column: 1 / -1;
   text-align: center;

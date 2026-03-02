@@ -4,6 +4,7 @@
 
 const USERS_KEY = "users_auth";
 const CURRENT_USER_KEY = "current_user";
+const CLIENT_ID_KEY = "current_client_id";
 
 // ===============================
 // Helpers internos (NO exportados)
@@ -48,6 +49,7 @@ export function loginAuth(email, password) {
 
 export function logoutAuth() {
   localStorage.removeItem(CURRENT_USER_KEY);
+  clearClientId();
 }
 
 export function getCurrentUser() {
@@ -56,4 +58,16 @@ export function getCurrentUser() {
 
 export function isLoggedIn() {
   return !!getCurrentUser();
+}
+
+export function setClientId(id) {
+  localStorage.setItem(CLIENT_ID_KEY, id);
+}
+
+export function getClientId() {
+  return localStorage.getItem(CLIENT_ID_KEY);
+}
+
+export function clearClientId() {
+  localStorage.removeItem(CLIENT_ID_KEY);
 }
