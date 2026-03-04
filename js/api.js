@@ -46,3 +46,55 @@ export async function getClients() {
 export async function getProducts() {
   return fetchJSON(`${API_BASE_URL}/products`);
 }
+
+// ===============================
+// Addresses
+// ===============================
+
+export async function getAddresses() {
+  return fetchJSON(`${API_BASE_URL}/addresses`);
+}
+
+export async function createAddress(addressData) {
+  return fetchJSON(`${API_BASE_URL}/addresses`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(addressData)
+  });
+}
+
+// ===============================
+// Orders
+// ===============================
+
+export async function createOrder(orderData) {
+  return fetchJSON(`${API_BASE_URL}/orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(orderData)
+  });
+}
+
+// ===============================
+// Order Details
+// ===============================
+
+export async function createOrderDetail(detailData) {
+  return fetchJSON(`${API_BASE_URL}/order_details`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(detailData)
+  });
+}
+
+// ===============================
+// Update Product Stock
+// ===============================
+
+export async function updateProduct(productId, productData) {
+  return fetchJSON(`${API_BASE_URL}/products/${productId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(productData)
+  });
+}

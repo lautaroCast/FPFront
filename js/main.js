@@ -14,8 +14,8 @@ let cart = [];
 // ===============================
 
 import { initUI, renderProducts, renderCart, updateAuthUI, closeModal, setAddToCartHandler, setCartHandlers } from "./ui.js";
-import { registerAuth, loginAuth, logoutAuth, isLoggedIn, setClientId } from "./auth.js";
-import { createClient, getProducts, getClients } from "./api.js";
+import { registerAuth, loginAuth, logoutAuth, isLoggedIn, setClientId, getClientId } from "./auth.js";
+import { createOrder, createOrderDetail, updateProduct, getAddresses, createAddress, getProducts } from "./api.js";
 
 // ===============================
 // App Init
@@ -31,6 +31,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   initStockFilter();
   initCategoryFilters();
   initCartUI();
+  
+  document.addEventListener("click", async (e) => {
+  if (e.target.id === "checkout-btn") {
+    await handleCheckout();
+  }
+  });
 
   const productCards = document.getElementById("product-cards");
 
@@ -61,6 +67,102 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 });
 
+async function handleCheckout() {
+  try {
+    if (!isLoggedIn()) {
+      alert("Debes iniciar sesión para finalizar la compra");
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert("El carrito está vacío");
+      return;
+    }
+
+    const clientId = getClientId();
+    if (!clientId) {
+      alert("No se encontró el cliente");
+      return;
+    }
+
+    //  1. VALIDAR STOCK REAL (refetch productos)
+    const freshProducts = await getProducts();
+
+    for (const item of cart) {
+      const product = freshProducts.find(p => p.id_key === item.id);
+
+      if (!product) {
+        alert(`Producto no encontrado: ${item.name}`);
+        return;
+      }
+
+      if (item.quantity > product.stock) {
+        alert(`Stock insuficiente para ${item.name}`);
+        return;
+      }
+    }
+
+    //  2. OBTENER O CREAR ADDRESS
+    const allAddresses = await getAddresses();
+    let clientAddresses = allAddresses.filter(a => a.client_id == clientId);
+
+    let address;
+
+    if (clientAddresses.length > 0) {
+      address = clientAddresses[0];
+    } else {
+      const street = prompt("Ingrese su calle:");
+      const city = prompt("Ingrese su ciudad:");
+      const zip = prompt("Ingrese su código postal:");
+
+      if (!street || !city || !zip) {
+        alert("Dirección incompleta");
+        return;
+      }
+
+      address = await createAddress({
+        client_id: Number(clientId),
+        street,
+        city,
+        zip_code: zip
+      });
+    }
+
+    //  3. CREAR ORDER
+    const total = calculateTotal();
+
+    const order = await createOrder({
+    total: total,
+    delivery_method: 1, 
+    status: 1,          
+    client_id: Number(clientId)
+    });
+
+    //  4. CREAR ORDER DETAILS
+    for (const item of cart) {
+      await createOrderDetail({
+        order_id: order.id_key,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price
+      });
+    }
+
+    //  5. LIMPIAR CARRITO
+    cart = [];
+    renderCart(cart, 0);
+
+    //  6. REFRESCAR PRODUCTOS
+    allProducts = await getProducts();
+    aplicarFiltros();
+
+    alert("Compra realizada con éxito 🎉");
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al procesar la compra");
+  }
+}
 // ===============================
 // Auth Events
 // ===============================

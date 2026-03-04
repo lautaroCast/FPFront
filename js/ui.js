@@ -145,7 +145,8 @@ export function renderCart(cart, total) {
     return;
   }
 
-  container.innerHTML = cart.map(item => `
+  container.innerHTML = `
+  ${cart.map(item => `
     <div class="cart-item">
       <div>
         <strong>${item.name}</strong>
@@ -157,7 +158,12 @@ export function renderCart(cart, total) {
         <button class="increase-btn" data-id="${item.id}">+</button>
       </div>
     </div>
-  `).join("");
+  `).join("")}
+
+  <button id="checkout-btn" class="checkout-btn">
+    Finalizar compra
+  </button>
+`;
 
   totalEl.textContent = total;
   countEl.textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
