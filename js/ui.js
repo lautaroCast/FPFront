@@ -24,8 +24,12 @@ export function closeModal(type) {
 // ===============================
 
 export function initUI() {
+
   const signupBtn = document.getElementById("signupBtn");
   const loginBtn = document.getElementById("loginBtn");
+
+  const cartPanel = document.getElementById("cart-panel");
+  const cartButton = document.getElementById("cart-btn");
 
   if (signupBtn) signupBtn.onclick = () => openModal("signup");
   if (loginBtn) loginBtn.onclick = () => openModal("login");
@@ -35,8 +39,20 @@ export function initUI() {
   });
 
   window.onclick = e => {
+
     if (e.target === signupModal) closeModal("signup");
     if (e.target === loginModal) closeModal("login");
+
+    // CERRAR CARRITO SI SE HACE CLICK FUERA
+    if (
+      cartPanel &&
+      cartButton &&
+      !cartPanel.contains(e.target) &&
+      !cartButton.contains(e.target)
+    ) {
+      cartPanel.classList.add("cart-hidden");
+    }
+
   };
 }
 

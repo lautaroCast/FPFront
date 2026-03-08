@@ -383,6 +383,7 @@ function initCartUI() {
     cartPanel.classList.toggle("cart-hidden");
   });
 }
+
 function calculateTotal() {
   return cart.reduce(
     (total, item) => total + item.price * item.quantity,0
