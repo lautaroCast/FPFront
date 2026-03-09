@@ -16,6 +16,7 @@ let cart = [];
 import { initUI, renderProducts, renderCart, updateAuthUI, closeModal, setAddToCartHandler, setCartHandlers } from "./ui.js";
 import { registerAuth, loginAuth, logoutAuth, isLoggedIn, setClientId, getClientId } from "./auth.js";
 import { createOrder, createOrderDetail, updateProduct, getAddresses, createAddress, getProducts } from "./api.js";
+import Profile from "./pages/profile.js";
 
 // ===============================
 // App Init
@@ -439,4 +440,10 @@ function decreaseQuantity(id) {
   }
 
   renderCart(cart, calculateTotal());
+}
+const app = document.getElementById("app");
+
+function loadProfile() {
+  app.innerHTML = "";
+  app.appendChild(Profile());
 }
