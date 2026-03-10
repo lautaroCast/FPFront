@@ -6,99 +6,31 @@
   <title>Mi Perfil</title>
 
   <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/perfil.css">
 </head>
 
 <body>
 
-  <!-- ========================= -->
-  <!-- Header -->
-  <!-- ========================= -->
-  <header class="main-header">
+<header class="site-header">
 
-    <div class="logo">
-      <a href="index.html">Tienda</a>
-    </div>
+  <div class="logo">
+    <a href="index.html">Tienda</a>
+  </div>
 
-    <nav class="main-nav">
-      <a href="productos.html">Productos</a>
-      <a href="perfil.html" class="active">Mi perfil</a>
-      <button id="logoutBtn">Cerrar sesión</button>
-    </nav>
+  <nav class="main-nav">
+    <a href="productos.html">Productos</a>
+    <a href="perfil.html" class="active">Mi perfil</a>
+    <button id="logoutBtn">Cerrar sesión</button>
+  </nav>
 
-  </header>
+</header>
 
+<main>
+  <div id="profileRoot"></div>
+</main>
 
-  <!-- ========================= -->
-  <!-- Contenedor principal -->
-  <!-- ========================= -->
-  <main class="profile-container">
-
-
-    <!-- ========================= -->
-    <!-- Información del usuario -->
-    <!-- ========================= -->
-    <section class="profile-card">
-
-      <h1>Mi Perfil</h1>
-
-      <div class="profile-info">
-
-        <div class="profile-field">
-          <label>Nombre</label>
-          <span id="profileName">Cargando...</span>
-        </div>
-
-        <div class="profile-field">
-          <label>Email</label>
-          <span id="profileEmail">Cargando...</span>
-        </div>
-
-        <div class="profile-field">
-          <label>Teléfono</label>
-          <span id="profilePhone">Cargando...</span>
-        </div>
-
-        <div class="profile-field">
-          <label>Dirección</label>
-          <span id="profileAddress">Cargando...</span>
-        </div>
-
-      </div>
-
-      <button id="editProfileBtn" class="primary-btn">
-        Editar perfil
-      </button>
-
-    </section>
-
-
-
-    <!-- ========================= -->
-    <!-- Historial de pedidos -->
-    <!-- ========================= -->
-    <section class="orders-section">
-
-      <h2>Mis pedidos</h2>
-
-      <div id="ordersContainer" class="orders-container">
-
-        <!-- JS insertará los pedidos aquí -->
-
-      </div>
-
-    </section>
-
-
-  </main>
-
-
-  <!-- ========================= -->
-  <!-- Scripts -->
-  <!-- ========================= -->
-  <script type="module" src="js/main.js"></script>
+<script type="module" src="./js/main.js"></script>
 
 </body>
-
 </html>

@@ -64,18 +64,13 @@ export function updateAuthUI(isLoggedIn) {
   const loginBtn = document.getElementById("loginBtn");
   const signupBtn = document.getElementById("signupBtn");
   const profileBtn = document.getElementById("profileBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  
+  if (loginBtn) loginBtn.style.display = isLoggedIn ? "none" : "inline-block";
+  if (signupBtn) signupBtn.style.display = isLoggedIn ? "none" : "inline-block";
+  if (profileBtn) profileBtn.style.display = isLoggedIn ? "inline-block" : "none";
+  if (logoutBtn) logoutBtn.style.display = isLoggedIn ? "inline-block" : "none";
 
-  if (!loginBtn || !signupBtn || !profileBtn) return;
-
-  if (isLoggedIn) {
-    loginBtn.style.display = "none";
-    signupBtn.style.display = "none";
-    profileBtn.style.display = "inline-block";
-  } else {
-    loginBtn.style.display = "inline-block";
-    signupBtn.style.display = "inline-block";
-    profileBtn.style.display = "none";
-  }
 }
 
 // ===============================

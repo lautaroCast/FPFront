@@ -1,6 +1,16 @@
-export default function Profile() {
+export function renderProfile() {
+
   const container = document.createElement("div");
   container.className = "profile-container";
+
+  const client = JSON.parse(localStorage.getItem("user"));
+
+  if (!client) {
+    container.innerHTML = `
+      <p>No hay usuario logueado</p>
+    `;
+    return container;
+  }
 
   container.innerHTML = `
     <div class="profile-card">
@@ -12,19 +22,19 @@ export default function Profile() {
                 class="profile-avatar"
             >
 
-            <h2 class="profile-name">Juan Pérez</h2>
-            <p class="profile-email">juan@email.com</p>
+            <h2 class="profile-name">${client.name}</h2>
+            <p class="profile-email">${client.email}</p>
         </div>
 
         <div class="profile-info">
             <div class="profile-row">
                 <span>Rol:</span>
-                <span>Administrador</span>
+                <span>${client.role || "Cliente"}</span>
             </div>
 
             <div class="profile-row">
-                <span>Miembro desde:</span>
-                <span>2024</span>
+                <span>ID Usuario:</span>
+                <span>${client.id_key}</span>
             </div>
         </div>
 

@@ -8,23 +8,25 @@ let maxPrice = Infinity;
 let cart = [];
 
 
-
 // ===============================
 // Imports
 // ===============================
 
 import { initUI, renderProducts, renderCart, updateAuthUI, closeModal, setAddToCartHandler, setCartHandlers } from "./ui.js";
 import { registerAuth, loginAuth, logoutAuth, isLoggedIn, setClientId, getClientId } from "./auth.js";
-import { createOrder, createOrderDetail, updateProduct, getAddresses, createAddress, getProducts } from "./api.js";
-import Profile from "./pages/profile.js";
+import { createOrder, createOrderDetail, updateProduct, getAddresses, createAddress, getProducts, getClients } from "./api.js";
+import { renderProfile } from "./perfil.js";
+
 
 // ===============================
 // App Init
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
+
   initUI();
   updateAuthUI(isLoggedIn());
+
   initAuthEvents();
   initProductEvents();
   initHeaderSearch();
@@ -32,44 +34,69 @@ document.addEventListener("DOMContentLoaded", async () => {
   initStockFilter();
   initCategoryFilters();
   initCartUI();
-  
+
   document.addEventListener("click", async (e) => {
-  if (e.target.id === "checkout-btn") {
-    await handleCheckout();
-  }
+    if (e.target.id === "checkout-btn") {
+      await handleCheckout();
+    }
   });
 
   const productCards = document.getElementById("product-cards");
 
   if (productCards) {
-    
     try {
+
       const products = await getProducts();
       allProducts = products;
 
       initPriceFilter(products);
       aplicarFiltros();
-      
+
     } catch (error) {
       console.error(error);
       alert(error.message);
     }
   }
+
   setAddToCartHandler(productId => {
+
     const product = allProducts.find(p => p.id_key === productId);
     if (!product) return;
 
     addToCart(product);
+
   });
+
   setCartHandlers(
     increaseQuantity,
     decreaseQuantity
   );
 
+  const profileBtn = document.getElementById("profileBtn");
+
+  if (profileBtn) {
+    profileBtn.addEventListener("click", () => {
+      window.location.href = "perfil.html";
+    });
+  }
+
+  const profileRoot = document.getElementById("profileRoot");
+
+  if (profileRoot) {
+    loadProfile();
+  }
+
 });
 
+
+// ===============================
+// Checkout
+// ===============================
+
 async function handleCheckout() {
+
   try {
+
     if (!isLoggedIn()) {
       alert("Debes iniciar sesión para finalizar la compra");
       return;
@@ -81,15 +108,16 @@ async function handleCheckout() {
     }
 
     const clientId = getClientId();
+
     if (!clientId) {
       alert("No se encontró el cliente");
       return;
     }
 
-    //  1. VALIDAR STOCK REAL (refetch productos)
     const freshProducts = await getProducts();
 
     for (const item of cart) {
+
       const product = freshProducts.find(p => p.id_key === item.id);
 
       if (!product) {
@@ -101,17 +129,20 @@ async function handleCheckout() {
         alert(`Stock insuficiente para ${item.name}`);
         return;
       }
+
     }
 
-    //  2. OBTENER O CREAR ADDRESS
     const allAddresses = await getAddresses();
     let clientAddresses = allAddresses.filter(a => a.client_id == clientId);
 
     let address;
 
     if (clientAddresses.length > 0) {
+
       address = clientAddresses[0];
+
     } else {
+
       const street = prompt("Ingrese su calle:");
       const city = prompt("Ingrese su ciudad:");
       const zip = prompt("Ingrese su código postal:");
@@ -127,58 +158,67 @@ async function handleCheckout() {
         city,
         zip_code: zip
       });
+
     }
 
-    //  3. CREAR ORDER
     const total = calculateTotal();
 
     const order = await createOrder({
-    total: total,
-    delivery_method: 1, 
-    status: 1,          
-    client_id: Number(clientId)
+      total: total,
+      delivery_method: 1,
+      status: 1,
+      client_id: Number(clientId)
     });
 
-    //  4. CREAR ORDER DETAILS
     for (const item of cart) {
+
       await createOrderDetail({
         order_id: order.id_key,
         product_id: item.id,
         quantity: item.quantity,
         price: item.price
       });
+
     }
 
-    //  5. LIMPIAR CARRITO
     cart = [];
     renderCart(cart, 0);
 
-    //  6. REFRESCAR PRODUCTOS
     allProducts = await getProducts();
     aplicarFiltros();
 
     alert("Compra realizada con éxito 🎉");
 
   } catch (error) {
+
     console.error(error);
     alert("Error al procesar la compra");
+
   }
+
 }
+
+
 // ===============================
 // Auth Events
 // ===============================
 
 function initAuthEvents() {
+
   initSignup();
   initLogin();
   initLogout();
+
 }
 
+
 function initSignup() {
+
   const signupForm = document.getElementById("signupForm");
   if (!signupForm) return;
 
   signupForm.addEventListener("submit", async e => {
+
     e.preventDefault();
 
     const userData = {
@@ -190,6 +230,7 @@ function initSignup() {
     };
 
     try {
+
       registerAuth(userData.email, userData.password);
       await createClient(userData);
 
@@ -198,27 +239,31 @@ function initSignup() {
       updateAuthUI(true);
 
     } catch (error) {
-      alert(error.message);
-    }
-  });
-}
 
+      alert(error.message);
+
+    }
+
+  });
+
+}
 function initLogin() {
+
   const loginForm = document.getElementById("loginForm");
   if (!loginForm) return;
 
   loginForm.addEventListener("submit", async e => {
+
     e.preventDefault();
 
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
 
     try {
+
       loginAuth(email, password);
 
-      // 🔹 Traer clientes del backend
       const clients = await getClients();
-
       const client = clients.find(c => c.email === email);
 
       if (!client) {
@@ -227,128 +272,172 @@ function initLogin() {
 
       setClientId(client.id_key);
 
+      // 🔹 NUEVO: guardar usuario para perfil
+      localStorage.setItem("user", JSON.stringify(client));
+
       alert("Login exitoso");
       closeModal("login");
       updateAuthUI(true);
 
     } catch (error) {
+
       alert(error.message);
+
     }
+
   });
+
 }
 
-function initLogout() {
-  const profileBtn = document.getElementById("profileBtn");
-  if (!profileBtn) return;
 
-  profileBtn.addEventListener("click", () => {
+function initLogout() {
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (!logoutBtn) return;
+
+  logoutBtn.addEventListener("click", () => {
+
     if (!confirm("¿Cerrar sesión?")) return;
 
     logoutAuth();
+
+    // 🔹 NUEVO: eliminar usuario guardado
+    localStorage.removeItem("user");
+
     updateAuthUI(false);
     alert("Sesión cerrada 👋");
+
   });
+
 }
 
 // ===============================
-// Products (solo botón en index.html)
+// Products
 // ===============================
 
 function initProductEvents() {
+
   const productsBtn = document.getElementById("viewProductsBtn");
   if (!productsBtn) return;
 
   productsBtn.addEventListener("click", () => {
     window.location.href = "productos.html";
   });
+
 }
 
+
 // ===============================
-// Barra de búsqueda (productos.thml)
+// Filtros
 // ===============================
 
 function aplicarFiltros() {
+
   let filtrados = allProducts;
 
-  //  Filtro por texto
   if (searchText.trim() !== "") {
     filtrados = filtrados.filter(producto =>
       producto.name.toLowerCase().includes(searchText.toLowerCase())
     );
   }
 
-  //  Filtro por categoría
   if (selectedCategories.length > 0) {
     filtrados = filtrados.filter(producto =>
       selectedCategories.includes(producto.category_id)
     );
   }
 
-  //  Filtro por stock 
   if (onlyWithStock) {
     filtrados = filtrados.filter(producto => producto.stock > 0);
   }
 
-  // Filtro por Precio
   filtrados = filtrados.filter(producto =>
     producto.price >= minPrice && producto.price <= maxPrice
   );
 
   renderProducts(filtrados);
+
 }
 
+
 function initSidebarSearch() {
+
   const sidebarInput = document.getElementById("searchInput");
   if (!sidebarInput) return;
 
   sidebarInput.addEventListener("input", e => {
+
     searchText = e.target.value;
     aplicarFiltros();
+
   });
+
 }
 
+
 function initHeaderSearch() {
+
   const headerInput = document.getElementById("query");
   if (!headerInput) return;
 
   headerInput.addEventListener("input", e => {
+
     searchText = e.target.value;
     aplicarFiltros();
+
   });
+
 }
 
+
 function initCategoryFilters() {
+
   const checkboxes = document.querySelectorAll(".category-checkbox");
 
   checkboxes.forEach(checkbox => {
+
     checkbox.addEventListener("change", () => {
+
       const categoryId = Number(checkbox.value);
 
       if (checkbox.checked) {
+
         if (!selectedCategories.includes(categoryId)) {
           selectedCategories.push(categoryId);
         }
+
       } else {
+
         selectedCategories = selectedCategories.filter(id => id !== categoryId);
+
       }
 
       aplicarFiltros();
+
     });
+
   });
+
 }
 
 
 function initStockFilter() {
+
   const stockCheckbox = document.getElementById("stockFilter");
   if (!stockCheckbox) return;
 
   stockCheckbox.addEventListener("change", () => {
+
     onlyWithStock = stockCheckbox.checked;
     aplicarFiltros();
+
   });
+
 }
 
+
 function initPriceFilter(products) {
+
   const priceRange = document.getElementById("priceRange");
   const priceValue = document.getElementById("priceValue");
 
@@ -361,20 +450,27 @@ function initPriceFilter(products) {
   priceRange.value = maxProductPrice;
 
   maxPrice = maxProductPrice;
+
   priceValue.textContent = `$${maxProductPrice}`;
 
   priceRange.addEventListener("input", () => {
+
     maxPrice = Number(priceRange.value);
     priceValue.textContent = `$${maxPrice}`;
+
     aplicarFiltros();
+
   });
+
 }
 
+
 // ===============================
-// Cart UI
+// Cart
 // ===============================
 
 function initCartUI() {
+
   const cartBtn = document.getElementById("cart-btn");
   const cartPanel = document.getElementById("cart-panel");
 
@@ -383,37 +479,51 @@ function initCartUI() {
   cartBtn.addEventListener("click", () => {
     cartPanel.classList.toggle("cart-hidden");
   });
+
 }
+
 
 function calculateTotal() {
+
   return cart.reduce(
-    (total, item) => total + item.price * item.quantity,0
+    (total, item) => total + item.price * item.quantity,
+    0
   );
+
 }
 
+
 function addToCart(product) {
+
   const existing = cart.find(item => item.id === product.id_key);
 
   if (existing) {
+
     if (existing.quantity >= product.stock) {
       alert("No hay más stock disponible para este producto");
       return;
     }
 
     existing.quantity++;
+
   } else {
+
     cart.push({
       id: product.id_key,
       name: product.name,
       price: product.price,
       quantity: 1
     });
+
   }
 
   renderCart(cart, calculateTotal());
+
 }
 
+
 function increaseQuantity(id) {
+
   const item = cart.find(p => p.id === id);
   if (!item) return;
 
@@ -426,10 +536,14 @@ function increaseQuantity(id) {
   }
 
   item.quantity++;
+
   renderCart(cart, calculateTotal());
+
 }
 
+
 function decreaseQuantity(id) {
+
   const item = cart.find(p => p.id === id);
   if (!item) return;
 
@@ -440,10 +554,21 @@ function decreaseQuantity(id) {
   }
 
   renderCart(cart, calculateTotal());
+
 }
-const app = document.getElementById("app");
+
+
+// ===============================
+// Perfil
+// ===============================
 
 function loadProfile() {
+
+  const app = document.getElementById("profileRoot");
+
+  if (!app) return;
+
   app.innerHTML = "";
-  app.appendChild(Profile());
+  app.appendChild(renderProfile());
+
 }

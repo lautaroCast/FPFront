@@ -20,6 +20,15 @@ body {
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo a {
+  font-size: 38px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
 }
 
 .site-header h1 {
@@ -30,14 +39,14 @@ body {
 
 .main-nav {
   display: flex;
-  justify-content: center;
+  justify-content:center;
   align-items: center;
   gap: 15px;
   margin-top: 10px;
   flex-wrap: wrap;
 }
 
-.main-nav button {
+.main-nav button, .main-nav a {
   padding: 10px 20px;
   background-color: #666666;
   color: #ffffff;
@@ -46,6 +55,7 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
+  text-decoration: none;
 }
 
 .main-nav button:hover {
