@@ -36,12 +36,28 @@ export function renderProfile() {
                 <span>ID Usuario:</span>
                 <span>${client.id_key}</span>
             </div>
-        </div>
+
+            <div class="profile-row">
+                <span>Teléfono:</span>
+                <span>${client.telephone || "No proporcionado"}</span>
+            </div>
+
+            <div class="profile-row">
+                <span>Dirección:</span>
+                <span>${client.address || "No proporcionada"}</span>
+            </div>
 
         <button class="profile-edit-btn">
             Editar perfil
         </button>
 
+    </div>
+    <div class="profile-orders">
+      <h3>Pedidos</h3>
+      <div class="orders-list">
+        <p>Pedidos actuales</p>
+      </div>
+      
     </div>
   `;
 
